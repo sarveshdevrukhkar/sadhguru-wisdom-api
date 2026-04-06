@@ -145,13 +145,13 @@ npm install express mongoose dotenv cors
 npm install --save-dev nodemon
 ```
 
-| Package | Why |
-|---|---|
-| `express` | The framework |
-| `mongoose` | MongoDB ODM — schema, model, queries |
-| `dotenv` | Loads `.env` variables |
-| `cors` | Allows your Vercel frontend to call this API |
-| `nodemon` | Auto-restarts server on file change during dev |
+| Package    | Why                                            |
+| ---------- | ---------------------------------------------- |
+| `express`  | The framework                                  |
+| `mongoose` | MongoDB ODM — schema, model, queries           |
+| `dotenv`   | Loads `.env` variables                         |
+| `cors`     | Allows your Vercel frontend to call this API   |
+| `nodemon`  | Auto-restarts server on file change during dev |
 
 Update `server/package.json` scripts:
 
@@ -167,98 +167,108 @@ Update `server/package.json` scripts:
 ### 4. Build the Server Files
 
 **`server/src/config/db.js`**
+
 ```js
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
 const connectDB = async () => {
-  try {
-    await mongoose.connect(process.env.MONGO_URI);
-    console.log('MongoDB connected');
-  } catch (error) {
-    console.error('MongoDB connection failed:', error.message);
-    process.exit(1);
-  }
+ try {
+  await mongoose.connect(process.env.MONGO_URI);
+  console.log("MongoDB connected");
+ } catch (error) {
+  console.error("MongoDB connection failed:", error.message);
+  process.exit(1);
+ }
 };
 
 module.exports = connectDB;
 ```
 
 **`server/src/models/Quote.js`**
+
 ```js
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
-const quoteSchema = new mongoose.Schema({
+const quoteSchema = new mongoose.Schema(
+ {
   text: {
-    type: String,
-    required: true,
-    trim: true,
-  }
-}, { timestamps: true });
+   type: String,
+   required: true,
+   trim: true,
+  },
+ },
+ { timestamps: true },
+);
 
-module.exports = mongoose.model('Quote', quoteSchema);
+module.exports = mongoose.model("Quote", quoteSchema);
 ```
 
 **`server/src/controllers/quoteController.js`**
+
 ```js
-const Quote = require('../models/Quote');
+const Quote = require("../models/Quote");
 
 const getRandomQuote = async (req, res) => {
-  try {
-    const count = await Quote.countDocuments();
-    const random = Math.floor(Math.random() * count);
-    const quote = await Quote.findOne().skip(random);
-    res.status(200).json({ quote: quote.text });
-  } catch (error) {
-    res.status(500).json({ message: 'Failed to fetch quote' });
-  }
+ try {
+  const count = await Quote.countDocuments();
+  const random = Math.floor(Math.random() * count);
+  const quote = await Quote.findOne().skip(random);
+  res.status(200).json({ quote: quote.text });
+ } catch (error) {
+  res.status(500).json({ message: "Failed to fetch quote" });
+ }
 };
 
 module.exports = { getRandomQuote };
 ```
 
 **`server/src/routes/quoteRoutes.js`**
-```js
-const express = require('express');
-const router = express.Router();
-const { getRandomQuote } = require('../controllers/quoteController');
 
-router.get('/quote', getRandomQuote);
+```js
+const express = require("express");
+const router = express.Router();
+const { getRandomQuote } = require("../controllers/quoteController");
+
+router.get("/quote", getRandomQuote);
 
 module.exports = router;
 ```
 
 **`server/src/app.js`**
+
 ```js
-const express = require('express');
-const cors = require('cors');
-const quoteRoutes = require('./routes/quoteRoutes');
+const express = require("express");
+const cors = require("cors");
+const quoteRoutes = require("./routes/quoteRoutes");
 
 const app = express();
 
 app.use(cors({ origin: process.env.CLIENT_URL }));
 app.use(express.json());
-app.use('/', quoteRoutes);
+app.use("/", quoteRoutes);
 
 module.exports = app;
 ```
 
 **`server/server.js`**
+
 ```js
-require('dotenv').config();
-const app = require('./src/app');
-const connectDB = require('./src/config/db');
+require("dotenv").config();
+const app = require("./src/app");
+const connectDB = require("./src/config/db");
 
 const PORT = process.env.PORT || 5000;
 
 connectDB().then(() => {
-  app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
-  });
+ app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+ });
 });
 ```
 
 **`server/.env`**
-```
+
+```markdown
 PORT=5000
 MONGO_URI=your_mongodb_atlas_uri_here
 CLIENT_URL=http://localhost:5173
@@ -285,9 +295,12 @@ npm run dev
 ```
 
 You should see:
-```
+
+```markdown
 MongoDB connected
 Server running on port 5000
 ```
 
 Hit `http://localhost:5000/quote` in browser or Postman. It'll return empty for now — no quotes in DB yet. That's expected. We'll seed the DB in the next step.
+
+---
